@@ -210,4 +210,8 @@ resourceForm.addEventListener('submit', async (e) => {
 });
 
 updateAuthUI();
-loadResources();
+
+if (getToken()) {
+  loadResources();
+}
+
