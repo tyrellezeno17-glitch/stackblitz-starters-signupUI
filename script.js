@@ -3,17 +3,20 @@ const AUTH_URL = 'https://community-resource-api-8no4.onrender.com/api';
 
 const resourceList = document.getElementById('resource-list');
 const categoryFilter = document.getElementById('category-filter');
+const filterSection = document.getElementById('filter-section');
 const resourceForm = document.getElementById('resource-form');
 const formMessage = document.getElementById('form-message');
 
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
 const authMessage = document.getElementById('auth-message');
+
 const loggedOutView = document.getElementById('logged-out-view');
 const loggedInView = document.getElementById('logged-in-view');
 const userEmailSpan = document.getElementById('user-email');
 const logoutBtn = document.getElementById('logout-btn');
 const addResourceSection = document.getElementById('add-resource-section');
+const adminBadge = document.getElementById('admin-badge');
 
 function getToken() {
   return localStorage.getItem('token');
@@ -37,19 +40,26 @@ function updateAuthUI() {
   if (token) {
     loggedOutView.style.display = 'none';
     loggedInView.style.display = 'block';
+    filterSection.style.display = 'flex';
     userEmailSpan.textContent = email || '';
 
     if (isAdmin) {
       addResourceSection.style.display = 'block';
+      adminBadge.style.display = 'inline-block';
     } else {
       addResourceSection.style.display = 'none';
+      adminBadge.style.display = 'none';
     }
   } else {
     loggedOutView.style.display = 'block';
     loggedInView.style.display = 'none';
+    filterSection.style.display = 'none';
     addResourceSection.style.display = 'none';
     userEmailSpan.textContent = '';
-    resourceList.innerHTML = '<p>Please log in or sign up to view resources.</p>';
+    adminBadge.style.display = 'none';
+
+    resourceList.innerHTML =
+      '<p class="empty-state">Please log in or sign up to view resources.</p>';
   }
 }
 
@@ -132,11 +142,12 @@ async function loadResources(category = '') {
   const token = getToken();
 
   if (!token) {
-    resourceList.innerHTML = '<p>Please log in or sign up to view resources.</p>';
+    resourceList.innerHTML =
+      '<p class="empty-state">Please log in or sign up to view resources.</p>';
     return;
   }
 
-  resourceList.innerHTML = '<p>Loading resources...</p>';
+  resourceList.innerHTML = '<p class="empty-state">Loading resources...</p>';
 
   try {
     const url = category
@@ -154,7 +165,8 @@ async function loadResources(category = '') {
     if (response.status === 401) {
       clearSession();
       updateAuthUI();
-      resourceList.innerHTML = '<p>Your session expired. Please log in again.</p>';
+      resourceList.innerHTML =
+        '<p class="empty-state">Your session expired. Please log in again.</p>';
       return;
     }
 
@@ -165,7 +177,7 @@ async function loadResources(category = '') {
     const resources = data;
 
     if (resources.length === 0) {
-      resourceList.innerHTML = '<p>No resources found.</p>';
+      resourceList.innerHTML = '<p class="empty-state">No resources found.</p>';
       return;
     }
 
@@ -197,7 +209,7 @@ async function loadResources(category = '') {
     }
   } catch (err) {
     resourceList.innerHTML =
-      '<p>Error loading resources. The server may be waking up — try again in a moment.</p>';
+      '<p class="empty-state">Error loading resources. The server may be waking up — try again in a moment.</p>';
     console.error(err);
   }
 }
